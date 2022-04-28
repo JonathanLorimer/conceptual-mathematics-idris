@@ -133,6 +133,9 @@ The diagram below tries to provide a concrete example of a section and retractio
 representing the set of constituents of a district (y) and one representing a set of districts (z / x). I chose the names z
 and x as analogies to the diagrams above, but in this case 1x = h = 1z (or put another way x = z).
 
+Remember, we are using the example of sets here to provide something concrete, but the rules that apply to sets and
+functions don't apply to all categories.
+
        ┌───y────┐        ┌───────────────────────section example──────────────────────────┐        ┌───y────┐
        │Samantha├──┐     │Legend:                                                         │        │Samantha├──┐
        │        │  │     │- y are the constituents of a district                          │        │        │  │
@@ -149,11 +152,31 @@ and x as analogies to the diagrams above, but in this case 1x = h = 1z (or put a
        ▲       │         └────────────────────────────────────────────────────────────────┘        ▲       │
        └────── 1Toronto                                                                            └────── 1Toronto
 
-Therefore, we can think of a section as "taking a section" of a morphism's (in this case g's) source object. We can
-think of a retraction as "retracting" or "condensing" the target object back into the source with respect to some
-morphism (in this case f). The direction of this is all determined by the order of composition which preserves
-commutativity (i.e. whether left or right composition is equivalent to the id). A section s is right composed
-(runs first) `g . s = id`, while a retraction r is left composed (runs last) `r . f = id`.
+Therefore, we can think of a section as "choosing an example of a section". We can think of a retraction as "retracting"
+or "condensing" the constituents of a group into the name for that group. We can motivate this further by showing a
+non-trivial example. It should be more clear that for a function f that chooses an exemplary element, there is a
+retraction r that will take us back to the name of the group for which f(x) is an exemplary element. Conversely, for a
+function g, which labels a group there is a section s that picks an exemplary element from that group. Hopefully this
+illustrates how retractions and sections are connected to dividing objects (or really are maps that divide objects).
+
+                  retraction example                                  section example
+
+           ┌──────────┬────y────┬───────────┐                ┌──────────┬────y────┬───────────┐
+           │ Samantha │ Eddy ◄┐ │ Alice ◄┐  │                │ Samantha │ Eddy ◄┐ │ Alice ◄┐  │
+           │          │       │ │        │  │                │          │       │ │        │  │
+           │ Dennis   │ Claire│ │        │  │                │ Dennis   │ Claire│ │        │  │
+           │          │       │ │        │  │                │          │       │ │        │  │
+           │ Robert◄┐ │       │ │        │  │                │ Robert◄┐ │       │ │        │  │
+           └────┬───┼─┴────┬──┼─┴─────┬──┼──┘                └────┬───┼─┴────┬──┼─┴─────┬──┼──┘
+                │   │      │  │       │  │                        │   │      │  │       │  │
+                r   f      r  f       r  f                        g   s      g  s       g  s
+                │   │      │  │       │  │                        │   │      │  │       │  │
+                ▼   │      ▼  │       ▼  │                        ▼   │      ▼  │       ▼  │
+           ┌────────┴─┬────x──┴─┬────────┴──┐                ┌────────┴─┬────x──┴─┬────────┴──┐
+           │ Toronto  │ Calgary │ Vancouver │                │ Toronto  │ Calgary │ Vancouver │
+           └──────────┴─────────┴───────────┤                └──────────┴─────────┴───────────┤
+           ▲                                │                ▲                                │
+           └──────────────1x────────────────┘                └──────────────1x────────────────┘
 -----------------------------------------------------------------------------------------------------------------------}
 
 public export
@@ -180,9 +203,6 @@ record Isomorphism
 public export
 Automorphism : {cat : Category} -> (a : cat.Obj) -> Type
 Automorphism a = Isomorphism cat a a
-
--- The below examples are intended to elucidate the missing piece of a retraction / section that is needed to complete
--- the isomorphism
 
 public export
 isoFromRetraction :
