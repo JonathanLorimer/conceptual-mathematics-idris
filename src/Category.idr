@@ -1,18 +1,18 @@
 module Category
 
-
-infix 6 ~>
-infix 6 <<<
-
 public export
 record Category where
-  constructor MkCategory
+  constructor Cat
   Obj           : Type
   morph         : Obj -> Obj -> Type
-  id            : {a : Obj} -> morph a a
+  morphEq       : { a, b : Obj }
+               -> morph a b
+               -> morph a b
+               -> morph a b = morph a b
+  id            : { a : Obj } -> morph a a
   compose       : { a, b, c : Obj }
-               -> (f : morph b c)
-               -> (g : morph a b)
+               -> (g : morph b c)
+               -> (f : morph a b)
                -> morph a c
   leftIdentity  : { a, b : Obj }
                -> (f : morph a b)
@@ -20,7 +20,7 @@ record Category where
   rightIdentity : { a, b : Obj }
                -> (f : morph a b)
                -> compose f id = f
-  associativity : {a, b, c, d : Obj}
+  associativity : { a, b, c, d : Obj }
                -> (f : morph c d)
                -> (g : morph b c)
                -> (h : morph a b)

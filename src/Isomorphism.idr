@@ -3,15 +3,15 @@ module Isomorphism
 import Category
 
 {-----------------------------------------------------------------------------------------------------------------------
-A determination problem is one in which we have the first half of a composition,
-and therefore the second morphism is determined by the codomain of the first morphism
-and the codomain of the overall composition.
+A determination problem is one in which we have the first morphism of a composition fixed,
+and therefore the second morphism is determined by the target object of the first morphism
+and the target object of the overall composition.
 
-A choice problem is the opposite, in this case we have the second half of a composition,
-and therefore we get to choose a morphism that connects the domain of the overall composition
-and the domain of the second morphism.
+A choice problem is the opposite, in this case we have the second morphism in a composition fixed,
+and therefore we get to choose a morphism that connects the source object of the overall composition
+and the source object of the second morphism.
 
-Here is an example to illustrate the point .
+Here is an example to illustrate the point.
 
 For objects x, y, and z we will define morphisms f, g, and h such that:
  - f : x -> y (this is the first morphism in the composition)
@@ -36,20 +36,46 @@ Choice, again, mirrors determination; we get to select some s (named because of 
 sections) such that for g and h we can reconstruct the diagram above by substituting s for f. We can express the
 commutativity law for choice as g . s = h.
 
-Therefore, determination and choice give us the vocabulary to talk about the two constituent parts of the most basic
-kind of composition (binary)
+Therefore, determination and choice give us the vocabulary to talk about the two constituent parts of the simplest
+composition.
 -----------------------------------------------------------------------------------------------------------------------}
 
 public export
-record Determination (cat : Category) (x, y, z : cat.Obj) (h : cat.morph x z) (f : cat.morph x y) where
+record Determination
+  -- the category that we are operating in
+  (cat : Category)
+  -- the objects that our morphisms map between
+  (x, y, z : cat.Obj)
+  -- h : x -> z, this is the "composition" morphism
+  (h : cat.morph x z)
+  -- f : x -> y, this is the fixed first morphism
+  (f : cat.morph x y)
+  where
   constructor Determine
+  -- r : y -> z, this is the second morphism in the composition that is determined by f.
+  -- it is called r because it is a retraction when h = id, in the diagram above g = r.
   r : cat.morph y z
+
+  -- proof of commutativity
   commutativity : cat.compose {a = x, b = y, c = z} r f = h
 
 public export
-record Choice (cat : Category) (x, y, z : cat.Obj) (h : cat.morph x z) (g : cat.morph y z) where
+record Choice
+  -- the category that we are operating in
+  (cat : Category)
+  -- the objects that our morphisms map between
+  (x, y, z : cat.Obj)
+  -- h : x -> z, this is the "composition" morphism
+  (h : cat.morph x z)
+  -- g : y -> z, this is the fixed second morphism
+  (g : cat.morph y z)
+  where
   constructor Choose
+  -- s : x -> y, this is the first morphism in the composition that is chosen to fit with g.
+  -- it is called s because it is a section when h = id, in the diagram above f = s.
   s : cat.morph x y
+
+  -- proof of commutativity
   commutativity : cat.compose {a = x, b = y, c = z} g s = h
 
 
@@ -95,14 +121,17 @@ of categorical diagrams.
                   │                      ▲                 │                      ▲
                   └───────────h──────────┘                 └───────────h──────────┘
 
-The retraction example demonstrates an "embedded" retraction in the larger structure. The retraction is "made up of" f,
-r, and 1x (or id on x). The section example demonstrates how we might embedd a section into the same structure, and it
+The retraction example shows an "embedded" retraction in the larger structure. The retraction is made up of f,
+r, and 1x (or id on x). The section example also shows how we might embedd a section into the same structure, and it
 is made up of g, s, and 1z (or id on z).
 
 Notice how the target object for r has the identity morphism on it, while the source object for s has the identity? This
 is the fundamental difference between a section and a retraction. That is how you can distinguish which part of the
 isomorphism the section / retraction represents.
 
+The diagram below tries to provide a concrete example of a section and retraction using the example of two objects, one
+representing the set of constituents of a district (y) and one representing a set of districts (z / x). I chose the names z
+and x as analogies to the diagrams above, but in this case 1x = h = 1z (or put another way x = z).
 
        ┌───y────┐        ┌───────────────────────section example──────────────────────────┐        ┌───y────┐
        │Samantha├──┐     │Legend:                                                         │        │Samantha├──┐
@@ -135,14 +164,42 @@ public export
 HasSection : {cat : Category} -> {a, b : cat.Obj} -> (g : cat.morph b a) -> Type
 HasSection = Choice cat a b a cat.id
 
+{-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------}
+public export
+record Isomorphism
+  (cat : Category)
+  (a, b : cat.Obj)
+  where
+  constructor Iso
+  forward : cat.morph a b
+  backward : cat.morph b a
+  fInverse : cat.compose {a = b, b = a, c = b} forward backward = cat.id {a = b}
+  bInverse : cat.compose {a = a, b = b, c = a} backward forward = cat.id {a = a}
 
+public export
+Automorphism : {cat : Category} -> (a : cat.Obj) -> Type
+Automorphism a = Isomorphism cat a a
 
+-- The below examples are intended to elucidate the missing piece of a retraction / section that is needed to complete
+-- the isomorphism
 
+public export
+isoFromRetraction :
+  {cat : Category} ->
+  {x, y : cat.Obj} ->
+  (f : cat.morph x y) ->
+  (retract : HasRetraction {cat, a = x, b = y} f) ->
+  (cat.compose {a = y, b = x, c = y} f retract.r = cat.id {a = y}) ->
+  Isomorphism cat x y
+isoFromRetraction {cat} f (Determine r detComm) comm = Iso f r comm detComm
 
-
-
-
-
-
-
-
+public export
+isoFromSection :
+  {cat : Category} ->
+  {x, y : cat.Obj} ->
+  (f : cat.morph x y) ->
+  (section : HasSection {cat, a = y, b = x} f) ->
+  (cat.compose {a = x, b = y, c = x} section.s f = cat.id {a = x}) ->
+  Isomorphism cat x y
+isoFromSection {cat} f (Choose s choiceComm) comm = Iso f s choiceComm comm

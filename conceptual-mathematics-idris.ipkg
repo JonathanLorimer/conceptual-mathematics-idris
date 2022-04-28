@@ -3,6 +3,6 @@ version = 0.1.0
 
 opts = "-Wno-shadowing"
 
-depends = prelude
+depends = prelude, contrib
 
 sourcedir = "src"
